@@ -1,3 +1,6 @@
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   Accordion,
   AccordionContent,
@@ -5,7 +8,11 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+gsap.registerPlugin(ScrollTrigger);
+
 export const FAQSection = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
   const faqs = [
     {
       question: "What is Zults?",
@@ -37,8 +44,44 @@ export const FAQSection = () => {
     }
   ];
 
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const faqItems = container.querySelectorAll('.faq-item');
+    
+    // Set initial state - items hidden and positioned to the right
+    gsap.set(faqItems, {
+      opacity: 0,
+      x: 100,
+      scale: 0.95
+    });
+
+    // Animate each FAQ item when it enters viewport
+    faqItems.forEach((item, index) => {
+      gsap.to(item, {
+        opacity: 1,
+        x: 0,
+        scale: 1,
+        duration: 0.8,
+        ease: "power2.out",
+        delay: index * 0.15, // Stagger the animations
+        scrollTrigger: {
+          trigger: item,
+          start: "top 90%",
+          end: "bottom 20%",
+          toggleActions: "play none none reverse"
+        }
+      });
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
   return (
-    <section className="py-20 bg-card/5">
+    <section ref={containerRef} className="py-20 bg-card/5">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
@@ -52,7 +95,7 @@ export const FAQSection = () => {
               <AccordionItem 
                 key={index} 
                 value={`item-${index}`}
-                className="bg-card/10 backdrop-blur-sm rounded-xl border border-border/20 px-6 hover:border-primary/30 transition-colors"
+                className="faq-item bg-card/10 backdrop-blur-sm rounded-xl border border-border/20 px-6 hover:border-primary/30 transition-colors"
               >
                 <AccordionTrigger className="text-left text-lg font-semibold text-foreground hover:text-primary transition-colors py-6">
                   {faq.question}
