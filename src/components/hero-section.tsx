@@ -1,11 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { GlowingStar } from "@/components/ui/glowing-star";
+import { useMouseGradient } from "@/hooks/useMouseGradient";
 import phoneMockup from "@/assets/phone-mockup.png";
 import qrCode from "@/assets/qr-code.png";
 
 export const HeroSection = () => {
+  const gradientRef = useMouseGradient();
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
+      {/* Mouse gradient overlay */}
+      <div 
+        ref={gradientRef}
+        className="absolute inset-0 pointer-events-none z-0"
+      />
       {/* Animated Stars */}
       <div className="absolute top-20 left-20 animate-float">
         <GlowingStar size="sm" />
