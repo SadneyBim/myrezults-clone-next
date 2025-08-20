@@ -1,3 +1,6 @@
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { 
   Zap, 
   Shield, 
@@ -10,7 +13,11 @@ import {
   Bell 
 } from "lucide-react";
 
+gsap.registerPlugin(ScrollTrigger);
+
 export const FeaturesSection = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
   const features = [
     {
       icon: Zap,
@@ -59,8 +66,44 @@ export const FeaturesSection = () => {
     }
   ];
 
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const featureCards = container.querySelectorAll('.feature-card');
+    
+    // Set initial state - cards hidden
+    gsap.set(featureCards, {
+      opacity: 0,
+      y: 50,
+      scale: 0.95
+    });
+
+    // Animate each card when it enters viewport
+    featureCards.forEach((card, index) => {
+      gsap.to(card, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.6,
+        ease: "power2.out",
+        delay: index * 0.1, // Stagger the animations
+        scrollTrigger: {
+          trigger: card,
+          start: "top 85%",
+          end: "bottom 20%",
+          toggleActions: "play none none reverse"
+        }
+      });
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
   return (
-    <section className="py-20 bg-background">
+    <section ref={containerRef} className="py-20 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -77,7 +120,7 @@ export const FeaturesSection = () => {
             return (
               <div 
                 key={feature.title}
-                className="group p-6 rounded-2xl bg-card/10 backdrop-blur-sm border border-border/20 hover:border-primary/30 transition-all duration-500 hover:glow-primary hover:-translate-y-2"
+                className="feature-card group p-6 rounded-2xl bg-card/10 backdrop-blur-sm border border-border/20 hover:border-primary/30 transition-all duration-500 hover:glow-primary hover:-translate-y-2"
               >
                 <div className="mb-6">
                   <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center mb-4 group-hover:glow-primary transition-all duration-300">
